@@ -69,7 +69,7 @@ struct Main
     Main(Genode::Env &env) : _env(env), _timer(env), _x86(env, "x86"), _sntp(env, "sntp"), _clock(env, "clock")
     {
         unsigned long timeout = _config.xml().attribute_value<unsigned long>("timeout", 3);
-        unsigned long step = 20;
+        unsigned long step = 1800;
         Genode::log("--- clock test (", timeout, " times, ", step, "s) ---");
             
         Genode::log("test 1 : ");

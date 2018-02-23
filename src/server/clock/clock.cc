@@ -80,7 +80,16 @@ Rtc::Timestamp Clock::Clock::convert(unsigned long time)
 
 Rtc::Timestamp Clock::Clock::gettime()
 {
-    return convert(convert(_synced_timestamp) +
+    Rtc::Timestamp time = convert(convert(_synced_timestamp) +
             (_timer.elapsed_ms() / 1000 - _local_timestamp) +
             _skew * _skew_periods);
+    Rtc::Timestamp ts = time;
+    Genode::log(__func__, " ",
+            ts.year, "-",ts.month, "-",ts.day, " ",
+            ts.hour, ":",ts.minute, ":",ts.second, " ");
+    ts = convert(convert(ts) - _skew * _skew_periods);
+    Genode::log("skew(", _skew, "): ",
+            ts.year, "-",ts.month, "-",ts.day, " ",
+            ts.hour, ":",ts.minute, ":",ts.second, " ");
+    return time;
 }
