@@ -1,0 +1,11 @@
+LICENSE   := Apache-2.0
+VERSION   := git
+DOWNLOADS := telebot.git
+
+URL(telebot) := https://github.com/smartnode/telebot.git
+REV(telebot) := 104028209cb39e034f41930e5a459656d4b4d91c
+DIR(telebot) := src/lib/telebot
+
+DIRS += include/telebot
+DIR_CONTENT(include/telebot) := src/lib/telebot/include/**
+
