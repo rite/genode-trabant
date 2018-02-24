@@ -5,6 +5,7 @@ set build_components {
     drivers/timer
     drivers/vga_log
     test/log
+    test/vgalog
 }
 
 source ${genode_dir}/repos/base/run/platform_drv.inc
@@ -35,7 +36,7 @@ set config {
         <resource name="RAM" quantum="1M"/>
         <provides> <service name="Timer"/> </provides>
     </start>
-    
+
     <start name="vga_log_drv">
         <resource name="RAM" quantum="4M"/>
         <provides>
@@ -43,7 +44,16 @@ set config {
         </provides>
     </start>
 
+
     <start name="test-log">
+        <resource name="RAM" quantum="1M"/>
+        <route>
+            <service name="LOG"><child name="vga_log_drv"/></service>
+            <any-service> <parent/> <any-child/> </any-service>
+        </route>
+    </start>
+
+    <start name="test-vgalog">
         <resource name="RAM" quantum="1M"/>
         <route>
             <service name="LOG"><child name="vga_log_drv"/></service>
@@ -64,6 +74,7 @@ set boot_modules {
     core ld.lib.so init
     timer
     test-log
+    test-vgalog
     vga_log_drv
 }
 
