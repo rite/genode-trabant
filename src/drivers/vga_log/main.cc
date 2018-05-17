@@ -28,6 +28,16 @@ extern "C" {
         Genode::error(__func__);
     }
 
+    void __gnat_rcheck_CE_Invalid_Data()
+    {
+        Genode::error("Constraint_Error Invalid_Data");
+    }
+
+    void __gnat_rcheck_CE_Range_Check()
+    {
+        Genode::error("Constraint_Error Range_Check");
+    }
+
     extern void vga___elabs();
     extern void vga__putchar(char);
 
@@ -121,6 +131,7 @@ struct Main {
 
 	Main(Genode::Env &env) : _env(env)
 	{
+                env.exec_static_constructors();
 		env.parent().announce(env.ep().manage(_log_root));
 	}
 };

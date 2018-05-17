@@ -1,7 +1,7 @@
 TARGET   = vga_log_drv
-LIBS     = base
+LIBS     = base ada
 SRC_CC   = main.cc
-SRC_ADA  = vga.adb escape_dfa.adb
+SRC_ADB  = vga.adb escape_dfa.adb
 INC_DIR += $(PRG_DIR)/include
 
 include $(REP_DIR)/mk/gnat_opts.mk

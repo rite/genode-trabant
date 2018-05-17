@@ -72,6 +72,7 @@ install_config $config
 
 set boot_modules {
     core ld.lib.so init
+    ada.lib.so
     timer
     test-log
     test-vgalog
