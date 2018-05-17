@@ -1,0 +1,8 @@
+LICENSE   := GPLv3
+VERSION   := git
+DOWNLOADS := amatrix.git
+
+URL(amatrix) := https://github.com/jklmnn/amatrix.git
+REV(amatrix) := 2d420845f091b053da8c5bd057d327a6fefe140e
+DIR(amatrix) := amatrix
+
