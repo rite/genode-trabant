@@ -35,10 +35,22 @@ is
                 Cur_Blink := False;
                 Cur_Foreground := 15;
                 Cur_Background := 0;
+            when Escape_Dfa.Graphics_Mode_Foreground_Colors_Black =>
+                Cur_Foreground := 0;
             when Escape_Dfa.Graphics_Mode_Foreground_Colors_Red =>
                 Cur_Foreground := 4;
+            when Escape_Dfa.Graphics_Mode_Foreground_Colors_Green =>
+                Cur_Foreground := 2;
+            when Escape_Dfa.Graphics_Mode_Foreground_Colors_Yellow =>
+                Cur_Foreground := 14;
             when Escape_Dfa.Graphics_Mode_Foreground_Colors_Blue =>
                 Cur_Foreground := 1;
+            when Escape_Dfa.Graphics_Mode_Foreground_Colors_Magenta =>
+                Cur_Foreground := 5;
+            when Escape_Dfa.Graphics_Mode_Foreground_Colors_Cyan =>
+                Cur_Foreground := 3;
+            when Escape_Dfa.Graphics_Mode_Foreground_Colors_White =>
+                Cur_Foreground := 7;
             when others =>
                 null;
         end case;
