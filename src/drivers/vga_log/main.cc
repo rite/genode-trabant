@@ -84,6 +84,12 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
                                         case Input::KEY_ESC:    vga__reset();   break;
                                         case Input::KEY_UP:     vga__up();      break;
                                         case Input::KEY_DOWN:   vga__down();    break;
+                                        case Input::KEY_PAGEUP:
+                                            for(int i = 0; i < 10; i++) vga__up();
+                                            break;
+                                        case Input::KEY_PAGEDOWN:
+                                            for(int i = 0; i < 10; i++) vga__down();
+                                            break;
                                         default: break;
                                     }
                                 });
