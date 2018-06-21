@@ -26,7 +26,7 @@ is
                 when 10 =>
                     Scroll;
                 when 32 .. 126 =>
-                    VGA_Screen (24) (Cursor) := VC;
+                    VGA_Buffer (Buffer_Size - 1) (Cursor) := VC;
                     Cursor := Cursor + 1;
                 when others =>
                     null;
@@ -60,11 +60,45 @@ is
     is
         Empty : constant Symbol := (False, 0, 0, Character'Val (0));
     begin
-        for I in 0 .. 23 loop
-            VGA_Screen (I) := VGA_Screen (I + 1);
+        for I in 0 .. VGA_Buffer'Last - 1 loop
+            VGA_Buffer (I) := VGA_Buffer (I + 1);
         end loop;
-        VGA_Screen (24) := (others => Empty);
+        VGA_Buffer (VGA_Buffer'Last) := (others => Empty);
         Cursor := 0;
+        Window;
     end Scroll;
+
+    procedure Window
+    is
+    begin
+        for I in VGA_Screen'Range loop
+            VGA_Screen (I) := VGA_Buffer (I + Offset);
+        end loop;
+    end Window;
+
+    procedure Up
+    is
+    begin
+        if Offset > 0 then
+            Offset := Offset - 1;
+        end if;
+        Window;
+    end Up;
+
+    procedure Down
+    is
+    begin
+        if Offset < Max_Offset then
+            Offset := Offset + 1;
+        end if;
+        Window;
+    end Down;
+
+    procedure Reset
+    is
+    begin
+        Offset := Max_Offset;
+        Window;
+    end Reset;
 
 end VGA;

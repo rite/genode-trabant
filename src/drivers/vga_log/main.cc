@@ -13,6 +13,7 @@
 #include <util/reconstructible.h>
 #include <util/xml_node.h>
 #include <util/string.h>
+#include <input_session/connection.h>
 
 static void *vga_buffer = 0;
 
@@ -38,8 +39,21 @@ extern "C" {
         Genode::error("Constraint_Error Range_Check");
     }
 
+    void __gnat_rcheck_CE_Overflow_Check()
+    {
+        Genode::error("Constraint_Error Overflow_Check");
+    }
+
+    void __gnat_rcheck_CE_Index_Check()
+    {
+        Genode::error("Constraint_Error Index_Check");
+    }
+
     extern void vga___elabs();
     extern void vga__putchar(char);
+    extern void vga__up(void);
+    extern void vga__down(void);
+    extern void vga__reset(void);
 
 };
 
@@ -58,10 +72,30 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
             Genode::uint32_t bpp;
         } _core_fb { };
 
-        Genode::Constructible<Genode::Attached_io_mem_dataspace> _fb_mem { };
+        Genode::Constructible<Genode::Attached_io_mem_dataspace> _fb_mem;
+        Input::Connection _input;
+        Genode::Signal_handler<Session_component> _input_sigh;
+
+        void handle_key()
+        {
+            _input.for_each_event([&] (Input::Event const &ev) {
+                        ev.handle_press([&] (Input::Keycode key, Genode::Codepoint) {
+                                    switch(key){
+                                        case Input::KEY_ESC:    vga__reset();   break;
+                                        case Input::KEY_UP:     vga__up();      break;
+                                        case Input::KEY_DOWN:   vga__down();    break;
+                                        default: break;
+                                    }
+                                });
+                    });
+        }
 
     public:
-        Session_component(Genode::Env &env, Genode::Xml_node pinfo) : _env(env)
+        Session_component(Genode::Env &env, Genode::Xml_node pinfo) :
+            _env(env),
+            _fb_mem(),
+            _input(env),
+            _input_sigh(env.ep(), *this, &Session_component::handle_key)
         {
             unsigned fb_boot_type = 2;
 
@@ -93,6 +127,7 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
 
             vga_buffer = _fb_mem->local_addr<void>();
             vga___elabs();
+            _input.sigh(_input_sigh);
         }
 
         Genode::size_t write(String const &str)

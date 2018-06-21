@@ -12,6 +12,9 @@ is
     type Foreground_Color is new Integer range 0 .. 15
       with Size => 4;
 
+    Buffer_Size : constant Integer := 1024;
+    Screen_Size : constant Integer := 25;
+
     type Symbol is
         record
             Blink      : Boolean;
@@ -32,7 +35,11 @@ is
     type Cursor_Location is new Integer range 0 .. 79;
 
     type Line is array (Cursor_Location range 0 .. 79) of Symbol;
-    type Screen is array (Integer range 0 .. 24) of Line;
+    type Screen is array (Integer range 0 .. Screen_Size - 1) of Line;
+    type Screen_Buffer is array (Integer range 0 .. Buffer_Size - 1) of Line;
+
+    Max_Offset : constant Integer := Buffer_Size - Screen_Size;
+    Offset : Integer := Max_Offset;
 
     function Get_Buffer return System.Address
       with
@@ -52,13 +59,24 @@ is
         Effective_Writes,
         Async_Readers;
 
+    VGA_Buffer : Screen_Buffer := (others => (others => (Blink => False,
+                                                         Background => 0,
+                                                         Foreground => 0,
+                                                         Char       => ' ')));
+
     procedure Putchar (C : Character)
       with
         Global => (In_Out => (Cursor,
                               Cur_Blink,
                               Cur_Background,
                               Cur_Foreground),
-                   Output => (VGA_Screen));
+                   Output => (VGA_Buffer));
+
+    procedure Window;
+
+    procedure Up;
+    procedure Down;
+    procedure Reset;
 
     Ascii_State : Escape_Dfa.Escape_Mode := Escape_Dfa.Normal;
 
