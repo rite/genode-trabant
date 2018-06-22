@@ -35,11 +35,12 @@ is
     type Cursor_Location is new Integer range 0 .. 79;
 
     type Line is array (Cursor_Location range 0 .. 79) of Symbol;
-    type Screen is array (Integer range 0 .. Screen_Size - 1) of Line;
-    type Screen_Buffer is array (Integer range 0 .. Buffer_Size - 1) of Line;
+    type Buffer is array (Natural range <>) of Line;
+    subtype Screen is Buffer (0 .. Screen_Size - 1);
+    subtype Screen_Buffer is Buffer (0 .. Buffer_Size - 1);
 
-    Max_Offset : constant Integer := Buffer_Size - Screen_Size;
-    Offset : Integer := Max_Offset;
+    Max_Offset : constant Natural := Buffer_Size - Screen_Size;
+    Offset : Natural := Max_Offset;
 
     function Get_Buffer return System.Address
       with

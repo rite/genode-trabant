@@ -71,9 +71,8 @@ is
     procedure Window
     is
     begin
-        for I in VGA_Screen'Range loop
-            VGA_Screen (I) := VGA_Buffer (I + Offset);
-        end loop;
+        VGA_Screen := VGA_Buffer (VGA_Buffer'First + Offset ..
+                                  VGA_Buffer'First + Offset + VGA_Screen'Length - 1);
     end Window;
 
     procedure Up

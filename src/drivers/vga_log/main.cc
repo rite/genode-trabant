@@ -27,26 +27,46 @@ extern "C" {
     void __gnat_last_chance_handler()
     {
         Genode::error(__func__);
+        throw Genode::Exception();
     }
 
     void __gnat_rcheck_CE_Invalid_Data()
     {
         Genode::error("Constraint_Error Invalid_Data");
+        throw Genode::Exception();
     }
 
     void __gnat_rcheck_CE_Range_Check()
     {
         Genode::error("Constraint_Error Range_Check");
+        throw Genode::Exception();
     }
 
     void __gnat_rcheck_CE_Overflow_Check()
     {
         Genode::error("Constraint_Error Overflow_Check");
+        throw Genode::Exception();
     }
 
     void __gnat_rcheck_CE_Index_Check()
     {
         Genode::error("Constraint_Error Index_Check");
+        throw Genode::Exception();
+    }
+
+    void __gnat_rcheck_CE_Length_Check()
+    {
+        Genode::error("Constraint_Error Length_Check");
+        throw Genode::Exception();
+    }
+
+    Genode::int64_t system__arith_64__add_with_ovflo_check(Genode::int64_t x, Genode::int64_t y)
+    {
+        Genode::int64_t z = x + y;
+        if(z < x || z < y){
+            __gnat_rcheck_CE_Overflow_Check();
+        }
+        return z;
     }
 
     extern void vga___elabs();
@@ -182,7 +202,6 @@ struct Main {
 
 	Main(Genode::Env &env) : _env(env)
 	{
-                env.exec_static_constructors();
 		env.parent().announce(env.ep().manage(_log_root));
 	}
 };
