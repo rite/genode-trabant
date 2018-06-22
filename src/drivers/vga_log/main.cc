@@ -73,12 +73,13 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
         } _core_fb { };
 
         Genode::Constructible<Genode::Attached_io_mem_dataspace> _fb_mem;
-        Input::Connection _input;
+        Genode::Constructible<Input::Connection> _input;
         Genode::Signal_handler<Session_component> _input_sigh;
 
         void handle_key()
         {
-            _input.for_each_event([&] (Input::Event const &ev) {
+            if(_input.constructed()){
+                _input->for_each_event([&] (Input::Event const &ev) {
                         ev.handle_press([&] (Input::Keycode key, Genode::Codepoint) {
                                     switch(key){
                                         case Input::KEY_ESC:    vga__reset();   break;
@@ -94,16 +95,23 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
                                     }
                                 });
                     });
+            }
         }
 
     public:
         Session_component(Genode::Env &env, Genode::Xml_node pinfo) :
             _env(env),
             _fb_mem(),
-            _input(env),
+            _input(),
             _input_sigh(env.ep(), *this, &Session_component::handle_key)
         {
             unsigned fb_boot_type = 2;
+
+            try{
+                _input.construct(_env);
+            }catch (Genode::Service_denied){
+                Genode::warning("Failed to get Input session, no scrolling available.");
+            }
 
             try {
                 Genode::Xml_node fb = pinfo.sub_node("boot").sub_node("framebuffer");
@@ -133,7 +141,9 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
 
             vga_buffer = _fb_mem->local_addr<void>();
             vga___elabs();
-            _input.sigh(_input_sigh);
+            if(_input.constructed()){
+                _input->sigh(_input_sigh);
+            }
         }
 
         Genode::size_t write(String const &str)
