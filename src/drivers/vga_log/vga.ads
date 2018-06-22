@@ -46,7 +46,8 @@ is
       with
         Import,
         Convention => C,
-        External_Name => "get_buffer";
+        External_Name => "get_buffer",
+        Global => null;
 
     Cursor : Cursor_Location := 0;
     Cur_Blink : Boolean := False;
@@ -65,25 +66,52 @@ is
                                                          Foreground => 0,
                                                          Char       => ' ')));
 
+    Ascii_State : Escape_Dfa.Escape_Mode := Escape_Dfa.Normal;
+
     procedure Putchar (C : Character)
       with
         Global => (In_Out => (Cursor,
                               Cur_Blink,
                               Cur_Background,
-                              Cur_Foreground),
-                   Output => (VGA_Buffer));
+                              Cur_Foreground,
+                              Ascii_State,
+                              Offset),
+                   Output => (VGA_Buffer,
+                              VGA_Screen));
 
-    procedure Window;
+    procedure Window
+      with
+        Pre => Offset <= Max_Offset and Offset >= 0,
+      Global => (Input => (VGA_Buffer, Offset),
+                 Output => VGA_Screen);
 
-    procedure Up;
-    procedure Down;
-    procedure Reset;
+    procedure Up
+      with
+        Pre => Offset <= Max_Offset,
+        Post => Offset >= 0,
+        Global => (In_Out => Offset,
+                   Input => VGA_Buffer,
+                   Output => VGA_Screen);
 
-    Ascii_State : Escape_Dfa.Escape_Mode := Escape_Dfa.Normal;
+    procedure Down
+      with
+        Pre => Offset <= Max_Offset,
+        Post => Offset <= Max_Offset,
+        Global => (In_Out => Offset,
+                   Input => VGA_Buffer,
+                   Output => VGA_Screen);
+
+    procedure Reset
+      with
+        Post => Offset = Max_Offset,
+        Global => (Input => VGA_Buffer,
+                   Output => (VGA_Screen,
+                              Offset));
 
 private
 
     procedure Scroll
-      with Global => (In_Out => VGA_Screen);
+    with Global => (In_Out => (VGA_Buffer, Offset),
+                    Output => (Cursor, VGA_Screen));
 
 end VGA;

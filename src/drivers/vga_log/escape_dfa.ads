@@ -1,4 +1,7 @@
-package Escape_Dfa is
+package Escape_Dfa
+with
+SPARK_Mode
+is
 
     type Escape_Mode is (
                          Normal,
@@ -20,6 +23,13 @@ package Escape_Dfa is
                         );
 
     Mode : Escape_Mode := Normal;
+
+    function Translate (
+                        Input : Integer;
+                        State : Escape_Mode
+                       ) return Escape_Mode;
+
+private
 
     type Transition is
         record
@@ -53,10 +63,5 @@ package Escape_Dfa is
                              (Graphics_Mode_Foreground_Colors_White, 109, Graphics_Mode),
                              (Graphics_Mode_Text_Attributes_Off, 109, Graphics_Mode)
                             );
-
-    function Translate (
-                        Input : Integer;
-                        State : Escape_Mode
-                       ) return Escape_Mode;
 
 end Escape_Dfa;

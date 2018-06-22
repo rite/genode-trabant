@@ -65,6 +65,9 @@ is
         end loop;
         VGA_Buffer (VGA_Buffer'Last) := (others => Empty);
         Cursor := 0;
+        if Offset > Max_Offset then
+            Offset := Max_Offset;
+        end if;
         Window;
     end Scroll;
 

@@ -1,4 +1,7 @@
-package body Escape_Dfa is
+package body Escape_Dfa
+with
+SPARK_Mode
+is
 
    ---------------
    -- Translate --
