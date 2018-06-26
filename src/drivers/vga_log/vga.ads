@@ -1,11 +1,51 @@
 with System;
-with Escape_Dfa;
 use all type System.Address;
 
 package VGA
 with
-SPARK_Mode
+SPARK_Mode,
+  Abstract_State => (Char_State,
+                     (Screen_State with External => (Effective_Writes,
+                                                     Async_Readers)),
+                     Buffer_State,
+                     Offset_State,
+                     Cursor_State)
 is
+
+    procedure Putchar (C : Character)
+      with
+        Global => (In_Out => (Cursor_State,
+                              Char_State,
+                              Screen_State,
+                              Buffer_State),
+                   Input  => (Offset_State));
+
+    procedure Up
+      with
+        Global => (In_Out => Offset_State,
+                   Input  => Buffer_State,
+                   Output => Screen_State),
+      Depends => (Offset_State => Offset_State,
+                  Screen_State => (Buffer_State, Offset_State));
+
+    procedure Down
+      with
+        Global => (In_Out => Offset_State,
+                   Input  => Buffer_State,
+                   Output => Screen_State),
+      Depends => (Offset_State => Offset_State,
+                  Screen_State => (Buffer_State, Offset_State));
+
+    procedure Reset
+      with
+        Global => (Input  => (Buffer_State),
+                   Output => (Screen_State),
+                   In_Out => (Offset_State)),
+        Depends => (Offset_State => null,
+                    Screen_State => Buffer_State,
+                    null         => (Offset_State));
+
+private
 
     type Background_Color is new Integer range 0 .. 7
       with Size => 3;
@@ -14,6 +54,7 @@ is
 
     Buffer_Size : constant Integer := 1024;
     Screen_Size : constant Integer := 25;
+    type Offset is new Integer range 0 .. Buffer_Size - Screen_Size;
 
     type Symbol is
         record
@@ -39,9 +80,6 @@ is
     subtype Screen is Buffer (0 .. Screen_Size - 1);
     subtype Screen_Buffer is Buffer (0 .. Buffer_Size - 1);
 
-    Max_Offset : constant Natural := Buffer_Size - Screen_Size;
-    Offset : Natural := Max_Offset;
-
     function Get_Buffer return System.Address
       with
         Import,
@@ -49,69 +87,18 @@ is
         External_Name => "get_buffer",
         Global => null;
 
-    Cursor : Cursor_Location := 0;
-    Cur_Blink : Boolean := False;
-    Cur_Background : Background_Color := 0;
-    Cur_Foreground : Foreground_Color := 15;
-
-    VGA_Screen : Screen
-      with
-        Address => Get_Buffer,
-        Volatile,
-        Effective_Writes,
-        Async_Readers;
-
-    VGA_Buffer : Screen_Buffer := (others => (others => (Blink => False,
-                                                         Background => 0,
-                                                         Foreground => 0,
-                                                         Char       => ' ')));
-
-    Ascii_State : Escape_Dfa.Escape_Mode := Escape_Dfa.Normal;
-
-    procedure Putchar (C : Character)
-      with
-        Global => (In_Out => (Cursor,
-                              Cur_Blink,
-                              Cur_Background,
-                              Cur_Foreground,
-                              Ascii_State,
-                              Offset),
-                   Output => (VGA_Buffer,
-                              VGA_Screen));
-
     procedure Window
       with
-        Pre => Offset <= Max_Offset and Offset >= 0,
-      Global => (Input => (VGA_Buffer, Offset),
-                 Output => VGA_Screen);
-
-    procedure Up
-      with
-        Pre => Offset <= Max_Offset,
-        Post => Offset >= 0,
-        Global => (In_Out => Offset,
-                   Input => VGA_Buffer,
-                   Output => VGA_Screen);
-
-    procedure Down
-      with
-        Pre => Offset <= Max_Offset,
-        Post => Offset <= Max_Offset,
-        Global => (In_Out => Offset,
-                   Input => VGA_Buffer,
-                   Output => VGA_Screen);
-
-    procedure Reset
-      with
-        Post => Offset = Max_Offset,
-        Global => (Input => VGA_Buffer,
-                   Output => (VGA_Screen,
-                              Offset));
-
-private
+        Global => (Input  => (Buffer_State, Offset_State),
+                   Output => Screen_State),
+      Depends => (Screen_State => (Buffer_State, Offset_State));
 
     procedure Scroll
-    with Global => (In_Out => (VGA_Buffer, Offset),
-                    Output => (Cursor, VGA_Screen));
+      with Global => (Input  => (Offset_State),
+                      In_Out => (Buffer_State),
+                      Output => (Cursor_State, Screen_State)),
+      Depends => (Cursor_State => null,
+                  Buffer_State => Buffer_State,
+                  Screen_State => (Buffer_State, Offset_State));
 
 end VGA;

@@ -5,8 +5,35 @@ use all type Escape_Dfa.Escape_Mode;
 
 package body VGA
 with
-SPARK_Mode
+SPARK_Mode,
+  Refined_State => (Char_State => (Cur_Blink,
+                                   Cur_Background,
+                                   Cur_Foreground,
+                                   Ascii_State),
+                    Screen_State => VGA_Screen,
+                    Buffer_State => VGA_Buffer,
+                    Cursor_State => Cursor,
+                    Offset_State => Window_Offset)
 is
+
+    Cursor : Cursor_Location := 0;
+    Cur_Blink : Boolean := False;
+    Cur_Background : Background_Color := 0;
+    Cur_Foreground : Foreground_Color := 15;
+    Ascii_State : Escape_Dfa.Escape_Mode := Escape_Dfa.Normal;
+    Window_Offset : Offset := Offset'Last;
+
+    VGA_Buffer : Screen_Buffer := (others => (others => (Blink => False,
+                                                         Background => 0,
+                                                         Foreground => 0,
+                                                         Char       => ' ')));
+
+    VGA_Screen : Screen
+      with
+        Address => Get_Buffer,
+        Volatile,
+        Effective_Writes,
+        Async_Readers;
 
     procedure Putchar
       (C : Character)
@@ -65,24 +92,21 @@ is
         end loop;
         VGA_Buffer (VGA_Buffer'Last) := (others => Empty);
         Cursor := 0;
-        if Offset > Max_Offset then
-            Offset := Max_Offset;
-        end if;
         Window;
     end Scroll;
 
     procedure Window
     is
     begin
-        VGA_Screen := VGA_Buffer (VGA_Buffer'First + Offset ..
-                                  VGA_Buffer'First + Offset + VGA_Screen'Length - 1);
+        VGA_Screen := VGA_Buffer (VGA_Buffer'First + Integer (Window_Offset) ..
+                                  VGA_Buffer'First + Integer (Window_Offset) + VGA_Screen'Length - 1);
     end Window;
 
     procedure Up
     is
     begin
-        if Offset > 0 then
-            Offset := Offset - 1;
+        if Window_Offset > 0 then
+            Window_Offset := Window_Offset - 1;
         end if;
         Window;
     end Up;
@@ -90,8 +114,8 @@ is
     procedure Down
     is
     begin
-        if Offset < Max_Offset then
-            Offset := Offset + 1;
+        if Window_Offset < Offset'Last then
+            Window_Offset := Window_Offset + 1;
         end if;
         Window;
     end Down;
@@ -99,7 +123,7 @@ is
     procedure Reset
     is
     begin
-        Offset := Max_Offset;
+        Window_Offset := Offset'Last;
         Window;
     end Reset;
 

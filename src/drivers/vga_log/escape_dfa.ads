@@ -40,7 +40,7 @@ private
 
     type Automata is array (Integer range <>) of Transition;
 
-    Ascii_Dfa : Automata := (
+    Ascii_Dfa : constant Automata := (
                              (Normal, 27, Start_Escape),
                              (Start_Escape, 91, Init_Escape),
                              (Init_Escape, 48, Graphics_Mode_Text_Attributes_Off),

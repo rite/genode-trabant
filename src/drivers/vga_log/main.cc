@@ -69,7 +69,7 @@ extern "C" {
         return z;
     }
 
-    extern void vga___elabs();
+    extern void vga___elabb();
     extern void vga__putchar(char);
     extern void vga__up(void);
     extern void vga__down(void);
@@ -160,7 +160,7 @@ class Session_component : public Genode::Rpc_object<Genode::Log_session>
                     true);
 
             vga_buffer = _fb_mem->local_addr<void>();
-            vga___elabs();
+            vga___elabb();
             if(_input.constructed()){
                 _input->sigh(_input_sigh);
             }
