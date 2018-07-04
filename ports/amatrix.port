@@ -3,6 +3,6 @@ VERSION   := git
 DOWNLOADS := amatrix.git
 
 URL(amatrix) := https://github.com/jklmnn/amatrix.git
-REV(amatrix) := 8364285fb805ae27686ac98fe08b6940fa3e31e0
+REV(amatrix) := bb792f82c9103051a50a1f3e2dbf2a2e45062f28
 DIR(amatrix) := amatrix
 

@@ -1,8 +1,6 @@
 
 include $(REP_DIR)/lib/import/import-amatrix.mk
 
-INC_DIR += $(REP_DIR)/src/lib/amatrix
-
 SRC_CC = http-curl.cc
 SRC_ADB = amatrix-client.adb \
 	  http.adb

@@ -2,6 +2,7 @@
 #include <base/log.h>
 #include <util/string.h>
 #include <curl/curl.h>
+#include <ada/exception.h>
 
 struct lv_string {
     int length;
@@ -21,6 +22,11 @@ static Genode::size_t recv_callback (char *ptr, Genode::size_t size, Genode::siz
 }
 
 extern "C" {
+
+    void __gnat_rcheck_PE_Missing_Return()
+    {
+        throw Ada::Exception::Program_Error();
+    }
 
     struct lv_string *curl_post(CURL *curl, char *url, char *data)
     {
