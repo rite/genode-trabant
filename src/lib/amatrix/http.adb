@@ -3,9 +3,6 @@ with System;
 package body Http
 is
 
-   type Curl_Type is new System.Address;
-   Curl : Curl_Type := Curl_Type (System.Null_Address);
-
    type LV_String is
       record
          Length : Integer;
@@ -45,8 +42,23 @@ is
                  Authentication : String
                 ) return String
    is
+       function Curl_Put (
+           Url : System.Address;
+           Content : System.Address;
+           Auth : System.Address
+           ) return System.Address
+        with
+            Import,
+            Convention => C,
+            External_Name => "curl_put";
+       Auth_Header : String := "Authorization: Bearer " & Authentication & Character'Val(0);
+       C_Url : String := Url & Character'Val(0);
+       C_Content : String := Url & Character'Val(0);
+       Response : constant String := String_From_C ( Curl_Put (C_Url'Address,
+                                                      C_Content'Address,
+                                                      Auth_Header'Address));
    begin
-      return Url & Content & Authentication;
+      return Response;
    end Put;
 
    function Post (
@@ -55,7 +67,6 @@ is
                  ) return String
    is
       function Curl_Post (
-                          Curl : Curl_Type;
                           Url  : System.Address;
                           Content : System.Address
                          )
@@ -66,22 +77,11 @@ is
           External_Name => "curl_post";
       C_Url : String := Url & Character'Val (0);
       C_Content : String := Content & Character'Val (0);
-      Response : String := String_From_C ( Curl_Post (
-                                           Curl,
+      Response : constant String := String_From_C ( Curl_Post (
                                            C_Url'Address,
                                            C_Content'Address));
    begin
       return Response;
    end Post;
-
-   function Curl_Easy_Init return Curl_Type
-     with
-       Import,
-       Convention => C,
-       External_Name => "curl_easy_init";
-
-begin
-
-   Curl := Curl_Easy_Init;
 
 end Http;
