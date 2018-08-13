@@ -4,8 +4,7 @@ set build_components {
     core init
     drivers/timer
     drivers/vga_log
-    test/log
-    test/vgalog
+    app/log_core
     drivers/input/pc-ps2
 }
 
@@ -58,19 +57,15 @@ set config {
         </route>
     </start>
 
-    <start name="test-log">
-        <resource name="RAM" quantum="1M"/>
+    <start name="log_core">
+        <resource name="RAM" quantum="10M"/>
+        <config period_ms="1000"/>
         <route>
+            <service name="ROM" unscoped_label="log_core"><parent/></service>
+            <service name="ROM" unscoped_label="ld.lib.so"><parent/></service>
+            <service name="ROM" label="log"><parent label="core_log"/></service>
             <service name="LOG"><child name="vga_log_drv"/></service>
-            <any-service> <parent/> <any-child/> </any-service>
-        </route>
-    </start>
-
-    <start name="test-vgalog">
-        <resource name="RAM" quantum="1M"/>
-        <route>
-            <service name="LOG"><child name="vga_log_drv"/></service>
-            <any-service> <parent/> <any-child/> </any-service>
+            <any-service><parent/><any-child/></any-service>
         </route>
     </start>
 }
@@ -87,8 +82,7 @@ set boot_modules {
     core ld.lib.so init
     ada.lib.so
     timer
-    test-log
-    test-vgalog
+    log_core
     vga_log_drv
     zircon.lib.so
     zx_pc_ps2_drv
